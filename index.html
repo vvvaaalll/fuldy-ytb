@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Fuldy - Accès privé</title>
+
+<style>
+/* ===== FOND ANIMÉ ===== */
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    color: white;
+    background: linear-gradient(120deg, #0a0a1a, #12002b);
+    overflow-x: hidden;
+}
+
+.bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    overflow: hidden;
+}
+
+.shape {
+    position: absolute;
+    width: 400px;
+    height: 400px;
+    border-radius: 50%;
+    filter: blur(120px);
+    opacity: 0.6;
+    animation: float 20s infinite alternate;
+}
+
+.shape.violet {
+    background: #8b5cf6;
+    top: 10%;
+    left: 5%;
+}
+
+.shape.blue {
+    background: #3b82f6;
+    top: 50%;
+    left: 60%;
+    animation-delay: 5s;
+}
+
+.shape.white {
+    background: #ffffff;
+    top: 70%;
+    left: 20%;
+    opacity: 0.25;
+    animation-delay: 10s;
+}
+
+@keyframes float {
+    from {
+        transform: translateY(0) translateX(0);
+    }
+    to {
+        transform: translateY(-100px) translateX(80px);
+    }
+}
+
+/* ===== LOGIN ===== */
+#login {
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.login-box {
+    background: rgba(20,20,40,0.85);
+    padding: 40px;
+    border-radius: 14px;
+    width: 300px;
+    text-align: center;
+    backdrop-filter: blur(10px);
+}
+
+.login-box input {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 6px;
+    margin-bottom: 15px;
+}
+
+.login-box button {
+    width: 100%;
+    padding: 12px;
+    background: #8b5cf6;
+    border: none;
+    border-radius: 6px;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.error {
+    margin-top: 10px;
+    color: #ff7777;
+    display: none;
+}
+
+/* ===== SITE ===== */
+#site {
+    display: none;
+    padding: 20px;
+    text-align: center;
+}
+
+button.main-btn,
+button.subscribe-btn,
+button.twitch-btn {
+    border: none;
+    padding: 15px 30px;
+    font-size: 18px;
+    border-radius: 8px;
+    cursor: pointer;
+    margin: 10px;
+    color: white;
+}
+
+.main-btn { background: #8b5cf6; }
+.subscribe-btn { background: #3b82f6; }
+.twitch-btn { background: #6441a5; }
+
+/* ===== CAROUSEL ===== */
+.video-carousel {
+    display: flex;
+    gap: 15px;
+    overflow-x: auto;
+    padding: 20px 0;
+}
+
+.video {
+    width: 250px;
+    flex-shrink: 0;
+    cursor: pointer;
+}
+
+.video img {
+    width: 100%;
+    border-radius: 12px;
+}
+
+.video-title {
+    margin-top: 6px;
+    font-size: 14px;
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- FOND -->
+<div class="bg">
+    <div class="shape violet"></div>
+    <div class="shape blue"></div>
+    <div class="shape white"></div>
+</div>
+
+<!-- LOGIN -->
+<div id="login">
+    <div class="login-box">
+        <h2>Accès privé</h2>
+        <input type="password" id="password" placeholder="Mot de passe">
+        <button onclick="checkPassword()">Entrer</button>
+        <div class="error" id="error">Mot de passe incorrect</div>
+    </div>
+</div>
+
+<!-- SITE -->
+<div id="site">
+    <h1>Fuldy</h1>
+
+    <button class="main-btn" onclick="window.open('https://www.youtube.com/@Fuldy-b2w','_blank')">
+        Chaîne YouTube
+    </button>
+
+    <button class="subscribe-btn" onclick="window.open('https://www.youtube.com/@Fuldy-b2w?sub_confirmation=1','_blank')">
+        S’abonner
+    </button>
+
+    <h2>Dernières vidéos</h2>
+    <div class="video-carousel" id="video-list"></div>
+
+    <button class="twitch-btn" onclick="window.open('https://m.twitch.tv/fuldy_games/home','_blank')">
+        Twitch
+    </button>
+</div>
+
+<script>
+const PASSWORD = "fuldy123";
+
+function checkPassword() {
+    if (document.getElementById("password").value === PASSWORD) {
+        document.getElementById("login").style.display = "none";
+        document.getElementById("site").style.display = "block";
+    } else {
+        document.getElementById("error").style.display = "block";
+    }
+}
+
+const API_KEY = "AIzaSyCbouGL7DaLwyu3kn2SgfPJHdjyFRZD0Q8";
+const CHANNEL_ID = "UC2s5wzHfC_Ay2_3TRTKwhEg";
+
+const videoList = document.getElementById("video-list");
+
+// Zone lecteur
+const player = document.createElement("div");
+player.id = "player";
+player.style.margin = "30px auto";
+player.style.maxWidth = "800px";
+player.innerHTML = `
+    <iframe id="ytplayer"
+        width="100%"
+        height="450"
+        src=""
+        frameborder="0"
+        allow="autoplay; encrypted-media"
+        allowfullscreen>
+    </iframe>
+`;
+videoList.before(player);
+
+// Récupération de TOUTES les vidéos
+fetch(`https://www.googleapis.com/youtube/v3/search?key=${API_KEY}&channelId=${CHANNEL_ID}&part=snippet&type=video&maxResults=50&order=date`)
+.then(r => r.json())
+.then(d => {
+    d.items.forEach(v => {
+        const videoId = v.id.videoId;
+
+        videoList.innerHTML += `
+        <div class="video" onclick="playVideo('${videoId}')">
+            <img src="${v.snippet.thumbnails.medium.url}">
+            <div class="video-title">
+                ${v.snippet.title}<br>
+                <span style="color:#8b5cf6;font-size:12px;">Vidéo</span>
+            </div>
+        </div>`;
+    });
+});
+
+function playVideo(id) {
+    document.getElementById("ytplayer").src =
+        "https://www.youtube-nocookie.com/embed/" + id +
+        "?autoplay=1&rel=0&modestbranding=1&origin=" + location.origin;
+
+    window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+</script>
+
+
+</body>
+</html>
