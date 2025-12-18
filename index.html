@@ -1,213 +1,128 @@
+(Le contenu est très long, voir réponse chat pour explications. Le code HTML complet suit ci-dessous.)
+
+```html
 <!DOCTYPE html>
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<title>Fuldy - Accès privé</title>
-
+<title>Fuldy</title>
 <style>
-body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-    background: linear-gradient(120deg, #0a0a1a, #12002b);
-    color: white;
-    text-align: center;
-}
-
-/* Cacher toutes les pages par défaut */
-#login, #site, #admin {
-    display: none;
-    padding: 40px;
-}
-
-/* LOGIN */
-#login {
-    display: flex;
-    height: 100vh;
-    justify-content: center;
-    align-items: center;
-}
-
-.login-box {
-    background: rgba(20,20,40,0.9);
-    padding: 30px;
-    border-radius: 12px;
-    width: 280px;
-}
-
-input {
-    width: 100%;
-    padding: 10px;
-    border-radius: 6px;
-    border: none;
-    margin-bottom: 15px;
-}
-
-button {
-    padding: 12px 25px;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 16px;
-    color: white;
-    background: #8b5cf6;
-    margin: 5px;
-}
-
-/* VIDEOS */
-.video-carousel {
-    display: flex;
-    gap: 15px;
-    overflow-x: auto;
-    padding: 20px;
-    justify-content: center;
-}
-
-.video {
-    width: 240px;
-    cursor: pointer;
-}
-
-.video img {
-    width: 100%;
-    border-radius: 10px;
-}
-
-#player {
-    max-width: 800px;
-    margin: 20px auto;
-}
+body{margin:0;font-family:Arial;background:linear-gradient(120deg,#0a0a1a,#12002b);color:white;text-align:center}
+#login,#register,#site,#admin{display:none;padding:40px}
+#login,#register{display:flex;height:100vh;justify-content:center;align-items:center}
+.box{background:rgba(20,20,40,.9);padding:30px;border-radius:12px;width:280px}
+input{width:100%;padding:10px;border-radius:6px;border:none;margin-bottom:10px}
+button{padding:10px 20px;border:none;border-radius:6px;cursor:pointer;color:white;background:#8b5cf6;margin:5px}
+.video-carousel{display:flex;gap:15px;overflow-x:auto;justify-content:center}
+.video{width:220px;cursor:pointer}
+.video img{width:100%;border-radius:10px}
+#player{max-width:800px;margin:20px auto}
+.admin-box{background:rgba(0,0,0,.3);padding:20px;border-radius:10px;margin:20px auto;max-width:400px}
 </style>
 </head>
-
 <body>
 
-<!-- LOGIN -->
 <div id="login">
-    <div class="login-box">
-        <h2>Connexion</h2>
-        <input type="password" id="password" placeholder="Mot de passe">
-        <button onclick="checkPassword()">Entrer</button>
-        <p id="error" style="color:red;display:none;">Mot de passe incorrect</p>
-    </div>
+ <div class="box">
+  <h2>Connexion</h2>
+  <input id="loginUser" placeholder="Utilisateur">
+  <input id="loginPass" type="password" placeholder="Mot de passe">
+  <button onclick="login()">Entrer</button>
+  <p onclick="showRegister()" style="cursor:pointer;color:#8b5cf6">Créer un compte</p>
+ </div>
 </div>
 
-<!-- SITE UTILISATEUR -->
+<div id="register">
+ <div class="box">
+  <h2>Créer un compte</h2>
+  <input id="regUser" placeholder="Utilisateur">
+  <input id="regPass" type="password" placeholder="Mot de passe">
+  <button onclick="register()">Créer</button>
+  <p onclick="showLogin()" style="cursor:pointer;color:#8b5cf6">Retour</p>
+ </div>
+</div>
+
 <div id="site">
-    <h1>Fuldy</h1>
-
-    <button onclick="window.open('https://www.youtube.com/@Fuldy-b2w','_blank')">
-        Chaîne YouTube
-    </button>
-
-    <button onclick="window.open('https://www.youtube.com/@Fuldy-b2w?sub_confirmation=1','_blank')"
-            style="background:#3b82f6;">
-        S’abonner
-    </button>
-
-    <!-- Lecteur -->
-    <div id="player">
-        <iframe id="ytplayer"
-                width="100%"
-                height="450"
-                src=""
-                allow="autoplay; encrypted-media"
-                allowfullscreen>
-        </iframe>
-    </div>
-
-    <!-- Liste vidéos -->
-    <div class="video-carousel" id="video-list"></div>
-
-    <!-- Twitch -->
-    <br><br>
-    <button onclick="window.open('https://m.twitch.tv/fuldy_games/home','_blank')"
-            style="background:#6441a5;">
-        Twitch
-    </button>
+ <h1>Fuldy</h1>
+ <button onclick="logout()">Déconnexion</button>
+ <div id="player"><iframe id="ytplayer" width="100%" height="450" allowfullscreen></iframe></div>
+ <div class="video-carousel" id="video-list"></div>
+ <button onclick="open('https://m.twitch.tv/fuldy_games/home','_blank')" style="background:#6441a5">Twitch</button>
 </div>
 
-<!-- ADMIN -->
 <div id="admin">
-    <h1>Admin panel</h1>
-    <p>Visites aujourd’hui : <span id="visits">0</span></p>
+ <h1>Admin panel</h1>
+ <button onclick="logout()">Déconnexion</button>
+ <p>Visites aujourd'hui : <span id="visits">0</span></p>
+ <div class="admin-box">
+  <h3>Ajouter vidéo (ID)</h3>
+  <input id="videoIdInput" placeholder="ID YouTube">
+  <button onclick="addVideo()">Ajouter</button>
+ </div>
 </div>
 
 <script>
-/* MOTS DE PASSE (TEST) */
-const USER_PASSWORD = "u";
-const ADMIN_PASSWORD = "a";
+const ADMIN_USER="admin";
+const API_KEY="AIzaSyCbouGL7DaLwyu3kn2SgfPJHdjyFRZD0Q8";
+const CHANNEL_ID="UC2s5wzHfC_Ay2_3TRTKwhEg";
 
-/* YOUTUBE */
-const API_KEY = "AIzaSyCbouGL7DaLwyu3kn2SgfPJHdjyFRZD0Q8";
-const CHANNEL_ID = "UC2s5wzHfC_Ay2_3TRTKwhEg";
+showLogin();
 
-/* AFFICHER LOGIN AU DÉPART */
-document.getElementById("login").style.display = "flex";
+function showLogin(){hideAll();login.style.display='flex'}
+function showRegister(){hideAll();register.style.display='flex'}
+function hideAll(){login.style.display=register.style.display=site.style.display=admin.style.display='none'}
 
-/* LOGIN LOGIQUE CORRIGÉE */
-function checkPassword() {
-    const pass = document.getElementById("password").value.trim();
-
-    document.getElementById("login").style.display = "none";
-    document.getElementById("site").style.display = "none";
-    document.getElementById("admin").style.display = "none";
-    document.getElementById("error").style.display = "none";
-
-    if (pass === ADMIN_PASSWORD) {
-        document.getElementById("admin").style.display = "block";
-        document.getElementById("visits").innerText =
-            localStorage.getItem("dailyVisits") || 0;
-    }
-    else if (pass === USER_PASSWORD) {
-        document.getElementById("site").style.display = "block";
-        updateDailyVisits();
-    }
-    else {
-        document.getElementById("login").style.display = "flex";
-        document.getElementById("error").style.display = "block";
-    }
+function register(){
+ const u=regUser.value.trim(),p=regPass.value;
+ if(!u||!p)return alert('Champs vides');
+ const users=JSON.parse(localStorage.getItem('users')||'{}');
+ if(users[u])return alert('Existe déjà');
+ users[u]={pass:p};
+ localStorage.setItem('users',JSON.stringify(users));
+ showLogin();
 }
 
-/* COMPTEUR JOURNALIER */
-function updateDailyVisits() {
-    const today = new Date().toISOString().slice(0, 10);
-    const savedDate = localStorage.getItem("visitDate");
-    let visits = parseInt(localStorage.getItem("dailyVisits")) || 0;
-
-    if (savedDate !== today) {
-        visits = 0;
-        localStorage.setItem("visitDate", today);
-    }
-
-    visits++;
-    localStorage.setItem("dailyVisits", visits);
+function login(){
+ const u=loginUser.value.trim(),p=loginPass.value;
+ const users=JSON.parse(localStorage.getItem('users')||'{}');
+ if(u===ADMIN_USER&&p==='admin'){hideAll();admin.style.display='block';updateVisits();loadAdmin();return}
+ if(!users[u]||users[u].pass!==p)return alert('Erreur');
+ hideAll();site.style.display='block';loadVideos();updateVisits();
 }
 
-/* RÉCUPÉRATION VIDÉOS */
-fetch(`https://www.googleapis.com/youtube/v3/search?key=${API_KEY}&channelId=${CHANNEL_ID}&part=snippet&type=video&order=date&maxResults=50`)
-.then(r => r.json())
-.then(d => {
-    const list = document.getElementById("video-list");
-    d.items.forEach(v => {
-        const id = v.id.videoId;
-        list.innerHTML += `
-        <div class="video" onclick="playVideo('${id}')">
-            <img src="${v.snippet.thumbnails.medium.url}">
-            <p>${v.snippet.title}</p>
-        </div>`;
-    });
-});
+function logout(){location.reload()}
 
-/* LECTEUR */
-function playVideo(id) {
-    document.getElementById("ytplayer").src =
-        "https://www.youtube-nocookie.com/embed/" + id +
-        "?autoplay=1&origin=" + location.origin;
+function updateVisits(){
+ const d=new Date().toISOString().slice(0,10);
+ if(localStorage.visitDate!==d){localStorage.visitDate=d;localStorage.dailyVisits=0}
+ localStorage.dailyVisits=+localStorage.dailyVisits+1||1;
+ visits.innerText=localStorage.dailyVisits;
+}
+
+function loadVideos(){
+ fetch(`https://www.googleapis.com/youtube/v3/search?key=${API_KEY}&channelId=${CHANNEL_ID}&part=snippet&type=video&order=date&maxResults=12`)
+ .then(r=>r.json()).then(d=>{
+  video-list.innerHTML='';
+  d.items.forEach(v=>{
+   video-list.innerHTML+=`<div class=video onclick=play('${v.id.videoId}')><img src=${v.snippet.thumbnails.medium.url}><p>${v.snippet.title}</p></div>`
+  })
+ })
+}
+
+function play(id){ytplayer.src=`https://www.youtube-nocookie.com/embed/${id}?autoplay=1&origin=${location.origin}`}
+
+function addVideo(){
+ const id=videoIdInput.value.trim();
+ if(!id)return;
+ const vids=JSON.parse(localStorage.getItem('customVideos')||'[]');
+ vids.push(id);
+ localStorage.setItem('customVideos',JSON.stringify(vids));
+ alert('Ajouté');
 }
 </script>
-
 </body>
 </html>
+```
 
 
 
