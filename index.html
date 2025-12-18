@@ -13,11 +13,13 @@ body {
     text-align: center;
 }
 
+/* Cacher toutes les pages par défaut */
 #login, #site, #admin {
     display: none;
     padding: 40px;
 }
 
+/* LOGIN */
 #login {
     display: flex;
     height: 100vh;
@@ -48,13 +50,16 @@ button {
     font-size: 16px;
     color: white;
     background: #8b5cf6;
+    margin: 5px;
 }
 
+/* VIDEOS */
 .video-carousel {
     display: flex;
     gap: 15px;
     overflow-x: auto;
     padding: 20px;
+    justify-content: center;
 }
 
 .video {
@@ -86,7 +91,7 @@ button {
     </div>
 </div>
 
-<!-- SITE USER -->
+<!-- SITE UTILISATEUR -->
 <div id="site">
     <h1>Fuldy</h1>
 
@@ -94,54 +99,76 @@ button {
         Chaîne YouTube
     </button>
 
+    <button onclick="window.open('https://www.youtube.com/@Fuldy-b2w?sub_confirmation=1','_blank')"
+            style="background:#3b82f6;">
+        S’abonner
+    </button>
+
+    <!-- Lecteur -->
     <div id="player">
-        <iframe id="ytplayer" width="100%" height="450" src="" allowfullscreen></iframe>
+        <iframe id="ytplayer"
+                width="100%"
+                height="450"
+                src=""
+                allow="autoplay; encrypted-media"
+                allowfullscreen>
+        </iframe>
     </div>
 
+    <!-- Liste vidéos -->
     <div class="video-carousel" id="video-list"></div>
 
+    <!-- Twitch -->
     <br><br>
-<button onclick="window.open('https://m.twitch.tv/fuldy_games/home','_blank')"
-        style="background:#6441a5;">
-    Twitch
-</button>
-
+    <button onclick="window.open('https://m.twitch.tv/fuldy_games/home','_blank')"
+            style="background:#6441a5;">
+        Twitch
+    </button>
 </div>
 
 <!-- ADMIN -->
 <div id="admin">
     <h1>Admin panel</h1>
-    <p>Visites aujourd’hui : <span id="visits"></span></p>
+    <p>Visites aujourd’hui : <span id="visits">0</span></p>
 </div>
 
 <script>
-const USER_PASSWORD = "user123";
-const ADMIN_PASSWORD = "admin123";
+/* MOTS DE PASSE (TEST) */
+const USER_PASSWORD = "u";
+const ADMIN_PASSWORD = "a";
 
+/* YOUTUBE */
 const API_KEY = "AIzaSyCbouGL7DaLwyu3kn2SgfPJHdjyFRZD0Q8";
 const CHANNEL_ID = "UC2s5wzHfC_Ay2_3TRTKwhEg";
 
-document.getElementById("site").style.display = "block";
+/* AFFICHER LOGIN AU DÉPART */
+document.getElementById("login").style.display = "flex";
 
+/* LOGIN LOGIQUE CORRIGÉE */
 function checkPassword() {
-    const pass = document.getElementById("password").value;
+    const pass = document.getElementById("password").value.trim();
 
-    if (pass === USER_PASSWORD) {
-        document.getElementById("login").style.display = "none";
-        document.getElementById("site").style.display = "block";
-        updateDailyVisits();
-    }
-    else if (pass === ADMIN_PASSWORD) {
-        document.getElementById("login").style.display = "none";
+    document.getElementById("login").style.display = "none";
+    document.getElementById("site").style.display = "none";
+    document.getElementById("admin").style.display = "none";
+    document.getElementById("error").style.display = "none";
+
+    if (pass === ADMIN_PASSWORD) {
         document.getElementById("admin").style.display = "block";
         document.getElementById("visits").innerText =
             localStorage.getItem("dailyVisits") || 0;
     }
+    else if (pass === USER_PASSWORD) {
+        document.getElementById("site").style.display = "block";
+        updateDailyVisits();
+    }
     else {
+        document.getElementById("login").style.display = "flex";
         document.getElementById("error").style.display = "block";
     }
 }
 
+/* COMPTEUR JOURNALIER */
 function updateDailyVisits() {
     const today = new Date().toISOString().slice(0, 10);
     const savedDate = localStorage.getItem("visitDate");
@@ -156,6 +183,7 @@ function updateDailyVisits() {
     localStorage.setItem("dailyVisits", visits);
 }
 
+/* RÉCUPÉRATION VIDÉOS */
 fetch(`https://www.googleapis.com/youtube/v3/search?key=${API_KEY}&channelId=${CHANNEL_ID}&part=snippet&type=video&order=date&maxResults=50`)
 .then(r => r.json())
 .then(d => {
@@ -170,6 +198,7 @@ fetch(`https://www.googleapis.com/youtube/v3/search?key=${API_KEY}&channelId=${C
     });
 });
 
+/* LECTEUR */
 function playVideo(id) {
     document.getElementById("ytplayer").src =
         "https://www.youtube-nocookie.com/embed/" + id +
@@ -178,8 +207,6 @@ function playVideo(id) {
 </script>
 
 </body>
-</html>
-
 </html>
 
 
